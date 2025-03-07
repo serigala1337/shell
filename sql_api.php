@@ -30,6 +30,17 @@ try {
     // Jika query adalah SELECT, ambil hasilnya
     if (stripos(trim($query), "SELECT") === 0) {
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Cek apakah ada kolom bernama "json" dan dekode isinya
+        foreach ($result as &$row) {
+            if (isset($row['json'])) {
+                $decoded_json = json_decode($row['json'], true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    $row['json'] = $decoded_json; // Ganti dengan array hasil decode
+                }
+            }
+        }
+
         echo json_encode(["status" => "success", "data" => $result]);
     } else {
         // Jika query bukan SELECT, jalankan dan berikan pesan sukses
@@ -39,3 +50,4 @@ try {
     echo json_encode(["error" => $e->getMessage()]);
 }
 ?>
+
