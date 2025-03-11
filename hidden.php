@@ -3,7 +3,7 @@ header("Content-Type: application/json");
 
 // Konfigurasi database
 $host = 'localhost';
-$dbname = 'polri_tilang';  // Database tetap, tidak bisa diubah dari URL
+$dbname = 'polri_tilang';  // Database tetap
 $user = 'app';
 $pass = 'G0dISthe)N#';
 
@@ -40,11 +40,18 @@ try {
     $stmt->execute(['name' => "%$name%"]);
     $result = $stmt->fetchAll();
 
+    // Decode kolom "json" jika ada
+    foreach ($result as &$row) {
+        if (isset($row['json'])) {
+            $row['json'] = json_decode($row['json'], true); // Decode JSON jadi array
+        }
+    }
+
     // Simpan log query
     writeLog("Query executed on DB [polri_tilang]: SELECT * FROM tnkb WHERE json LIKE '%$name%' LIMIT 20");
 
     // Output JSON
-    echo json_encode($result);
+    echo json_encode($result, JSON_PRETTY_PRINT);
 } catch (PDOException $e) {
     // Simpan error ke log
     writeLog("Database error: " . $e->getMessage());
